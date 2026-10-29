@@ -77,7 +77,13 @@ BluetoothAudioClientInterface::BluetoothAudioClientInterface(
 bool BluetoothAudioClientInterface::IsValid() const { return provider_ != nullptr; }
 
 bool BluetoothAudioClientInterface::is_aidl_available() {
-  return AServiceManager_isDeclared(kDefaultAudioProviderFactoryInterface.c_str());
+  // The interface is declared in the device VINTF manifest, but the provider
+  // factory is only registered once its implementation library is loaded (by
+  // the audio HAL service or the bluetooth audio passthrough chain). Relying
+  // on the declaration makes the audio paths block on a service that may
+  // never be registered, leaving Bluetooth stuck in TURNING_ON; check that
+  // the service is actually registered instead.
+  return AServiceManager_checkService(kDefaultAudioProviderFactoryInterface.c_str()) != nullptr;
 }
 
 std::vector<AudioCapabilities> BluetoothAudioClientInterface::GetAudioCapabilities() const {

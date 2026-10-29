@@ -61,7 +61,9 @@ BluetoothAudioClientInterface::~BluetoothAudioClientInterface() {
 bool BluetoothAudioClientInterface::IsValid() const { return provider_ != nullptr; }
 
 bool BluetoothAudioClientInterface::is_aidl_available() {
-  return AServiceManager_isDeclared(kDefaultAudioProviderFactoryInterface.c_str());
+  // See the equivalent implementation in audio_hal_interface/aidl: rely on
+  // the service actually being registered rather than the VINTF declaration.
+  return AServiceManager_checkService(kDefaultAudioProviderFactoryInterface.c_str()) != nullptr;
 }
 
 std::vector<AudioCapabilities> BluetoothAudioClientInterface::GetAudioCapabilities(
